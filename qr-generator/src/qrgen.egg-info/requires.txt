@@ -1,0 +1,10 @@
+qrcode>=7.4
+Pillow>=10.0
+
+[dev]
+pytest>=7
+opencv-python-headless>=4.8
+Flask>=3.0
+
+[web]
+Flask>=3.0

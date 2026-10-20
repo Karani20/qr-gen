@@ -1,0 +1,3 @@
+[console_scripts]
+qrgen = qrgen.cli:main
+qrgen-web = qrgen.web.app:main

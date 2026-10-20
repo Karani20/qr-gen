@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qrgen"
+version = "1.1.0"
+description = "A small QR code generator for links, text, Wi-Fi, contacts, WhatsApp and email. Command line, library and web app."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["qrcode>=7.4", "Pillow>=10.0"]
+
+[project.optional-dependencies]
+web = ["Flask>=3.0"]
+dev = ["pytest>=7", "opencv-python-headless>=4.8", "Flask>=3.0"]
+
+[project.scripts]
+qrgen = "qrgen.cli:main"
+qrgen-web = "qrgen.web.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"qrgen.web" = ["templates/*.html", "static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

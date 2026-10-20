@@ -1,0 +1,110 @@
+# qrgen
+
+A small QR code generator for the command line and for use as a Python library.
+Makes codes for links, text, Wi-Fi networks, contact cards, WhatsApp chats and email,
+and saves them as PNG or SVG. Everything runs locally.
+
+## Install
+
+Requires Python 3.9 or newer.
+
+    cd qr-generator
+    python3 -m venv .venv
+    source .venv/bin/activate        # Windows: .venv\Scripts\activate
+    pip install -e .
+
+This adds a `qrgen` command. Without installing, run `PYTHONPATH=src python -m qrgen ...`.
+
+## Use
+
+    qrgen link https://example.com -o site.png
+    qrgen wifi "Home Network" --password "s3cret pass" -o wifi.png
+    qrgen contact --first Ada --last Lovelace --phone +15551234567 --email ada@example.com -o ada.png
+    qrgen whatsapp 15551234567 --message "Hello!" -o chat.svg
+    qrgen email hello@example.com --subject "Hi" -o mail.png
+    qrgen text "Any message" --terminal            # preview in the terminal, no file
+
+Style options work with every kind:
+
+    qrgen link example.com --fg "#14213d" --shape dots --ec H --border 4 --size 2048 -o fancy.png
+
+| Option | Meaning |
+| --- | --- |
+| `-o, --output` | `.png` or `.svg`. Defaults to `qr.png`. |
+| `--terminal` | Also print the code as block characters. Add `--light-terminal` on a light background. |
+| `--size` | Minimum width in pixels. PNG uses whole pixels per module, so the result may be slightly larger. |
+| `--ec` | Error correction `L` `M` `Q` `H` (about 7, 15, 25, 30 percent damage recovery). |
+| `--shape` | `square` or `dots`. Dots are prettier and scan a little less reliably. The three corner eyes stay square so scanners can lock on. |
+| `--fg`, `--bg` | Colors as `#rrggbb` or `#rgb`. Low contrast or inverted colors print a warning. |
+| `--border` | Quiet zone in modules. The QR standard asks for 4. |
+
+## Web app
+
+A browser interface that uses the same code as the command line. The server builds the
+payload and draws the code, and the page shows a live preview with PNG and SVG downloads.
+
+    pip install -e ".[web]"
+    qrgen-web                         # http://127.0.0.1:5000
+    qrgen-web --host 0.0.0.0 --port 8080
+
+Without installing: `PYTHONPATH=src python -m qrgen.web`.
+
+For a real deployment, run it behind a production server:
+
+    pip install gunicorn
+    gunicorn -w 2 -b 0.0.0.0:8000 "qrgen.web.app:create_app()"
+
+The app keeps nothing: no database, no saved files, no logs of what you encode. Requests
+are limited to 64 KB, each field to 4000 characters and PNG size to 4096 px.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /` | The web page. |
+| `POST /api/generate` | JSON in, JSON out: payload, SVG preview, version, module count, contrast warning. |
+| `POST /api/download` | Same JSON plus `"format": "png"` or `"svg"`. Returns the file as an attachment. |
+
+Request body for both endpoints:
+
+    {
+      "kind": "wifi",
+      "fields": {"ssid": "Home", "password": "secret", "security": "WPA", "hidden": false},
+      "style": {"fg": "#14213d", "bg": "#ffffff", "shape": "dots", "border": 4, "ec": "Q"},
+      "size": 1024
+    }
+
+Field names per kind: `link` (url), `text` (text), `wifi` (ssid, password, security, hidden),
+`contact` (first, last, org, title, phone, email, website), `whatsapp` (phone, message),
+`email` (to, subject, body).
+
+## Use as a library
+
+    from qrgen import payloads, Style, save
+
+    data = payloads.wifi("Home Network", "s3cret pass")
+    save(data, "wifi.png", Style(fg="#14213d", shape="dots", ec="Q"), size=1024)
+
+Lower-level pieces: `build_matrix`, `to_png`, `to_svg`, `to_terminal`.
+
+## Test
+
+    pip install -e ".[dev]"
+    pytest
+
+The dev extra includes OpenCV, which lets the tests scan the generated PNGs and check
+that they decode to the original text.
+
+## Layout
+
+    src/qrgen/payloads.py   builders for each kind of content (no QR dependency)
+    src/qrgen/render.py     QR matrix, PNG, SVG, terminal output, color checks
+    src/qrgen/cli.py        argparse command line
+    src/qrgen/web/app.py    Flask app and JSON API
+    src/qrgen/web/templates the page
+    src/qrgen/web/static    style.css and app.js
+    tests/                  payload, rendering and web tests
+
+## Notes
+
+- Always scan a code with a phone before printing it.
+- The `qrcode` library does the QR encoding. Drawing is done in this project, so
+  colors, shapes and the quiet zone are under your control.

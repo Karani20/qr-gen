@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiet Zone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">QR code generator</p>
+    <h1>Quiet Zone</h1>
+    <p class="lede">Make a code for a link, a Wi-Fi network, a contact card or a WhatsApp chat. Codes are drawn by the server and sent straight back. Nothing is stored.</p>
+  </header>
+
+  <div class="app">
+    <div class="panel form">
+      <div class="group">
+        <span class="lbl" id="type-lbl">What should it open?</span>
+        <div class="tabs" role="tablist" aria-labelledby="type-lbl" id="tabs"></div>
+      </div>
+
+      <div class="fields" id="fields" role="tabpanel"></div>
+
+      <div class="opts">
+        <div class="opt-row">
+          <div class="opt">
+            <span class="lbl" id="ec-lbl">Error correction</span>
+            <div class="seg-group" role="radiogroup" aria-labelledby="ec-lbl">
+              <label class="seg"><input type="radio" name="ec" value="L"><span>L</span></label>
+              <label class="seg"><input type="radio" name="ec" value="M" checked><span>M</span></label>
+              <label class="seg"><input type="radio" name="ec" value="Q"><span>Q</span></label>
+              <label class="seg"><input type="radio" name="ec" value="H"><span>H</span></label>
+            </div>
+            <p class="hint" id="ec-hint" style="margin-top:8px"></p>
+          </div>
+          <div class="opt">
+            <span class="lbl" id="style-lbl">Module shape</span>
+            <div class="seg-group" role="radiogroup" aria-labelledby="style-lbl">
+              <label class="seg"><input type="radio" name="shape" value="square" checked><span>Square</span></label>
+              <label class="seg"><input type="radio" name="shape" value="dots"><span>Dots</span></label>
+            </div>
+          </div>
+          <div class="opt">
+            <span class="lbl" id="size-lbl">PNG size (min)</span>
+            <div class="seg-group" role="radiogroup" aria-labelledby="size-lbl">
+              <label class="seg"><input type="radio" name="size" value="512"><span>512</span></label>
+              <label class="seg"><input type="radio" name="size" value="1024" checked><span>1024</span></label>
+              <label class="seg"><input type="radio" name="size" value="2048"><span>2048</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="opt">
+          <span class="lbl">Colors</span>
+          <div class="colors">
+            <div class="color">
+              <input type="color" id="fg" value="#111111" aria-label="Code color">
+              <span><span class="name">Code</span><span class="hex" id="fg-hex">#111111</span></span>
+            </div>
+            <div class="color">
+              <input type="color" id="bg" value="#ffffff" aria-label="Background color">
+              <span><span class="name">Background</span><span class="hex" id="bg-hex">#ffffff</span></span>
+            </div>
+          </div>
+          <div class="presets" id="presets"></div>
+          <div class="note" id="contrast-note" role="status"></div>
+        </div>
+
+        <div class="opt">
+          <label class="lbl" for="quiet">Quiet zone</label>
+          <div class="quiet">
+            <input type="range" id="quiet" min="0" max="8" step="1" value="4">
+            <output id="quiet-out" for="quiet"></output>
+          </div>
+          <p class="hint" style="margin-top:6px">The blank border scanners need. The QR standard asks for 4 modules.</p>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel preview" aria-label="Preview">
+      <div class="plate" id="plate">
+        <p class="empty" id="empty">Fill in the details to see your code here.</p>
+        <img id="qr-img" alt="Generated QR code" hidden>
+      </div>
+      <dl class="meta" id="meta" hidden>
+        <dt>Version</dt><dd id="m-ver"></dd>
+        <dt>Grid</dt><dd id="m-grid"></dd>
+        <dt>Data</dt><dd id="m-bytes"></dd>
+        <dt>PNG export</dt><dd id="m-png"></dd>
+      </dl>
+      <div class="actions">
+        <button class="btn" id="save-png" type="button" disabled>Download PNG</button>
+        <button class="btn ghost" id="save-svg" type="button" disabled>Download SVG</button>
+        <button class="btn ghost" id="copy" type="button" disabled>Copy encoded text</button>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+      <div class="payload">
+        <label class="lbl" for="payload">Encoded text</label>
+        <textarea id="payload" readonly spellcheck="false"></textarea>
+      </div>
+    </aside>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
